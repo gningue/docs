@@ -1,5 +1,141 @@
 ---
-title: "Document de référence - Lecture et interprétation du Dashboard "Performance et Santé Relationnelle""
+title: "Comprendre les KPIs du Pilotage"
 ---
 
-/
+### Document de référence - Lecture et interprétation du Dashboard "Performance et Santé Relationnelle"
+
+Ce document a pour objectif d'expliquer en détail les indicateurs présentés dans le Dashboard **Performance et Santé Relationnelle**, afin de permettre aux utilisateurs (équipes projets, managers, directions clients) de comprendre la signification de chaque KPI, sa méthode de calcul et son intérêt dans le suivi global de la relation client.
+
+---
+
+## 1. Historique EWMA (Exponentially Weighted Moving Average)
+
+**Objectif du KPI :** Mesurer l'évolution lissée de la performance globale d'un client dans le temps. L'EWMA permet d'observer une tendance fiable sans être perturbée par les variations ponctuelles.
+
+**Pourquoi ce KPI est important :** Il reflète la trajectoire de performance du compte, en mettant en avant les évolutions réelles plutôt que les pics ou les creux exceptionnels. C'est un indicateur de stabilité et de progression continue.
+
+**Méthode de calcul :** L'EWMA repose sur une moyenne pondérée où les valeurs les plus récentes ont plus d'influence :
+
+EWMA_t = α × Score_t + (1 - α) × EWMA\_t-1
+
+- α = coefficient de pondération (par défaut 0.3)
+- Score_t = score de performance du client à la période t
+- EWMA\_t-1 = valeur de l'EWMA de la période précédente
+
+**Interprétation :**
+
+- Une courbe ascendante traduit une amélioration progressive.
+- Une courbe descendante traduit une dégradation ou une stagnation de la performance.
+
+---
+
+## 2. Indice de Climat Relationnel (ICR)
+
+**Objectif du KPI :** Évaluer la qualité globale de la relation client sur une période donnée, en intégrant la fréquence, la gravité et la récence des signaux et alertes observés.
+
+**Pourquoi ce KPI est important :** L'ICR fournit une vision synthétique du climat relationnel : il traduit le niveau de confiance, de fluidité et de satisfaction dans les échanges entre le client et les équipes. Cet indicateur aide à anticiper les tensions avant qu'elles ne deviennent critiques.
+
+**Méthode de calcul :** Chaque signal et alerte est pondéré selon son importance et sa récence :
+
+ICR = 100 - ∑(Impact_i)
+
+Avec : Impact_i = Base\_type × Poids\_niveau × e^(-λΔt)
+
+- Base\_type = 10 pour les signaux, 25 pour les alertes
+- Poids\_niveau = niveau d'importance ou de sévérité (1 à 4 ou 1 à 3)
+- e^(-λΔt) = facteur de décroissance temporelle (réduit le poids d'un événement ancien)
+
+**Interprétation :**
+
+- ICR supérieur à 80 : climat sain et équilibré
+- ICR entre 60 et 80 : climat à surveiller, légères tensions
+- ICR inférieur à 60 : relation fragile, interventions correctives recommandées
+
+---
+
+## 3. Heatmap de Performance
+
+**Objectif du KPI :** Visualiser les points forts et faibles de la collaboration sur les critères d'évaluation de la performance (management, planification, qualité, gestion du risque, etc.).
+
+**Pourquoi ce KPI est important :** La heatmap permet de repérer rapidement les domaines qui fonctionnent bien et ceux nécessitant des améliorations. Elle est conçue pour faciliter la priorisation des actions de suivi ou de formation.
+
+**Méthode de calcul :** Chaque item évalué lors des réunions ou audits clients est noté sur une échelle de 0 à 100 selon la maîtrise observée.
+
+**Codage couleur :**
+
+- 0–39 : niveau critique (rouge)
+- 40–59 : niveau d'attention (orange)
+- 60–79 : bon niveau (jaune/vert clair)
+- 80–100 : excellent niveau (vert)
+
+**Interprétation :** Les colonnes représentent les dates ou périodes, les lignes les critères évalués. Une concentration de cellules rouges indique un domaine de risque systémique.
+
+---
+
+## 4. Heatmap des Signaux
+
+**Objectif du KPI :** Mesurer et suivre l'intensité des signaux liés à la relation client (ex. communication, suivi de plan, time management, opportunités commerciales, etc.).
+
+**Pourquoi ce KPI est important :** Les signaux permettent d'anticiper les problématiques avant qu'elles ne génèrent des alertes critiques. Ils reflètent la perception de la qualité de gestion du compte dans le temps.
+
+**Méthode de calcul :** Chaque signal est évalué selon un niveau d'importance (1 à 4), puis converti en score de 0 à 100. Les signaux récents pèsent plus fort que les anciens dans la moyenne mobile.
+
+**Interprétation :** Un signal persistant à forte intensité sur plusieurs semaines est un indicateur de risque latent. À l'inverse, un signal qui s'atténue traduit une amélioration opérationnelle.
+
+---
+
+## 5. Risques Identifiés
+
+**Objectif du KPI :** Lister les alertes critiques actives, issues de la grille signal ou des mécanismes de détection automatique (retours négatifs, incidents récurrents, etc.).
+
+**Pourquoi ce KPI est important :** Ces alertes nécessitent une attention immédiate. Elles constituent un outil d'escalade et de priorisation pour les managers, garantissant une réactivité en cas de dégradation relationnelle.
+
+**Méthode de calcul :** Chaque alerte est caractérisée par :
+
+- Seules les alertes de niveau **Critical** sont prises en compte dans le Dashboard.
+- Une pondération par récence est appliquée (plus l'événement est récent, plus il est prioritaire).
+
+**Interprétation :** Les alertes sont classées par gravité et affichées avec leur niveau de sévérité. Leur disparition progressive dans le temps confirme la stabilisation de la relation.
+
+---
+
+## 6. Opportunités
+
+**Objectif du KPI :** Identifier les opportunités commerciales ou de collaboration issues des interactions client (ex. besoins complémentaires, élargissement de périmètre, nouvelles offres).
+
+**Pourquoi ce KPI est important :** Il met en avant les signaux positifs détectés par le système. Ces opportunités contribuent directement à la création de valeur et à la fidélisation.
+
+**Méthode de calcul :** Les opportunités sont extraites automatiquement à partir des évaluations de signaux de type "Upsell/Cross-sell" et confirmées par les retours de réunion.
+
+**Interprétation :** Un volume croissant d'opportunités associées à un ICR élevé traduit un partenariat stable et porteur.
+
+---
+
+## 7. Taux d'Objectifs et Taux d'Amélioration
+
+**Objectif du KPI :**
+
+- Le **Taux d'Objectifs** mesure la part des critères ayant atteint un niveau de performance défini comme satisfaisant (\> 70%).
+- Le **Taux d'Amélioration** mesure la progression entre deux périodes (par exemple deux réunions successives).
+
+**Pourquoi ces KPI sont importants :** Ils offrent une lecture directe de la dynamique du compte. Le Taux d'Amélioration montre la réactivité aux plans d'action et la capacité de progression continue.
+
+**Méthode de calcul :**
+
+- Taux d'objectifs = (Critères \>= 70 / Total critères) × 100
+- Taux d'amélioration = (Nb de critères en hausse / Total critères évalués) × 100
+
+**Interprétation :** Un compte performant a un Taux d'Objectifs élevé et un Taux d'Amélioration positif. Un Taux d'Amélioration négatif signale une phase de régression.
+
+---
+
+## 8. Conclusion : Lecture d'ensemble
+
+Le Dashboard Performance et Santé Relationnelle constitue un outil complet de pilotage de la qualité client. Il permet de :
+
+- Visualiser instantanément la santé du compte grâce à l'EWMA et à l'ICR ;
+- Identifier les signaux faibles et les risques émergents via les heatmaps ;
+- Prioriser les actions correctives et suivre leur efficacité ;
+- Valoriser les axes de réussite et détecter les opportunités commerciales.
+
+L'objectif final est de passer d'une logique de reporting à une **logique de pilotage proactif**, centrée sur la qualité de la relation et la performance durable.
