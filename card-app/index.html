@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Way2tech.au — Créez votre carte de visite numérique</title>
+  <meta name="description" content="Créez et partagez gratuitement votre carte de visite numérique Way2tech.au avec QR code." />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <!-- Librairie QR (chargée dans le navigateur du membre). Repli automatique si indisponible. -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+</head>
+<body>
+  <div class="w2t-wrap">
+    <header class="w2t-page-head w2t-no-print">
+      <span class="brand"><span class="dot"></span> Way2tech.au</span>
+      <h1>Votre carte de visite numérique</h1>
+      <p>Remplissez vos informations, récupérez votre lien et votre QR code à partager.</p>
+    </header>
+
+    <div class="w2t-grid">
+      <!-- Formulaire -->
+      <section class="w2t-panel w2t-no-print">
+        <h2>Vos informations</h2>
+        <form id="form" autocomplete="on">
+          <div class="w2t-two">
+            <div class="w2t-field">
+              <label for="firstName">Prénom</label>
+              <input id="firstName" name="firstName" type="text" placeholder="Babacar" />
+            </div>
+            <div class="w2t-field">
+              <label for="lastName">Nom</label>
+              <input id="lastName" name="lastName" type="text" placeholder="Gningue" />
+            </div>
+          </div>
+          <div class="w2t-field">
+            <label for="title">Poste / Fonction</label>
+            <input id="title" name="title" type="text" placeholder="Consultant Cloud" />
+          </div>
+          <div class="w2t-field">
+            <label for="org">Entreprise</label>
+            <input id="org" name="org" type="text" value="Way2tech.au" />
+          </div>
+          <div class="w2t-two">
+            <div class="w2t-field">
+              <label for="mobile">Mobile</label>
+              <input id="mobile" name="mobile" type="tel" placeholder="+61 4XX XXX XXX" />
+            </div>
+            <div class="w2t-field">
+              <label for="phone">Téléphone</label>
+              <input id="phone" name="phone" type="tel" placeholder="+61 X XXXX XXXX" />
+            </div>
+          </div>
+          <div class="w2t-field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="prenom@way2tech.au" />
+          </div>
+          <div class="w2t-field">
+            <label for="website">Site web</label>
+            <input id="website" name="website" type="text" placeholder="way2tech.au" />
+          </div>
+          <div class="w2t-field">
+            <label for="linkedin">LinkedIn</label>
+            <input id="linkedin" name="linkedin" type="text" placeholder="linkedin.com/in/votreprofil" />
+          </div>
+          <div class="w2t-field">
+            <label for="address">Adresse</label>
+            <input id="address" name="address" type="text" placeholder="Sydney, NSW, Australie" />
+          </div>
+          <div class="w2t-field">
+            <label for="note">Note</label>
+            <textarea id="note" name="note" placeholder="Une courte phrase de présentation…"></textarea>
+          </div>
+
+          <div class="w2t-actions">
+            <button type="submit" class="w2t-btn primary">Générer ma carte</button>
+            <button type="button" id="reset" class="w2t-btn">Réinitialiser</button>
+          </div>
+          <p class="w2t-hint">
+            Vos données ne sont pas envoyées sur un serveur : elles sont encodées
+            directement dans votre lien personnel. Conservez ce lien pour réutiliser
+            ou modifier votre carte plus tard.
+          </p>
+        </form>
+      </section>
+
+      <!-- Aperçu + partage -->
+      <section>
+        <div class="w2t-panel" style="margin-bottom:22px;">
+          <h2 class="w2t-no-print">Aperçu</h2>
+          <div id="preview"></div>
+        </div>
+
+        <div class="w2t-panel w2t-share" id="shareBlock" style="display:none;">
+          <h2 class="w2t-no-print">Partagez votre carte</h2>
+          <div class="w2t-qr" id="qr"></div>
+          <div class="w2t-link w2t-no-print">
+            <input id="link" type="text" readonly />
+            <button type="button" class="w2t-btn" id="copyLink">Copier</button>
+          </div>
+          <div class="w2t-actions w2t-no-print" style="justify-content:center;">
+            <a class="w2t-btn primary" id="openCard" target="_blank" rel="noopener">Ouvrir ma carte</a>
+            <button type="button" class="w2t-btn" id="downloadVcf">Télécharger .vcf</button>
+            <button type="button" class="w2t-btn" id="downloadQr">Télécharger le QR</button>
+            <button type="button" class="w2t-btn" id="printBtn">Imprimer</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="w2t-foot w2t-no-print">
+      Way2tech.au · Cartes de visite numériques · 100 % gratuit, sans inscription
+    </footer>
+  </div>
+
+  <div class="w2t-toast" id="toast"></div>
+
+  <script src="assets/card.js"></script>
+  <script>
+    (function () {
+      var FIELDS = ["firstName","lastName","title","org","mobile","phone","email","website","linkedin","address","note"];
+      var form = document.getElementById("form");
+      var preview = document.getElementById("preview");
+      var shareBlock = document.getElementById("shareBlock");
+      var STORAGE_KEY = "w2t_card";
+      var lastQR = null;
+
+      function readForm() {
+        var d = {};
+        FIELDS.forEach(function (k) { d[k] = document.getElementById(k).value.trim(); });
+        return d;
+      }
+      function writeForm(d) {
+        FIELDS.forEach(function (k) {
+          if (d[k] != null) document.getElementById(k).value = d[k];
+        });
+      }
+
+      function toast(msg) {
+        var t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        clearTimeout(toast._t);
+        toast._t = setTimeout(function () { t.classList.remove("show"); }, 1900);
+      }
+
+      function shareUrl(d) {
+        var base = new URL("card.html", window.location.href);
+        return base.href + "#" + W2T.encode(d);
+      }
+
+      function refreshPreview() {
+        W2T.render(preview, readForm());
+      }
+
+      function generate() {
+        var d = readForm();
+        W2T.render(preview, d);
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch (e) {}
+
+        var url = shareUrl(d);
+        document.getElementById("link").value = url;
+        document.getElementById("openCard").href = url;
+        lastQR = W2T.makeQR(document.getElementById("qr"), url, { size: 240 });
+        shareBlock.style.display = "block";
+        shareBlock.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function download(filename, content, mime) {
+        var blob = new Blob([content], { type: mime });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      }
+
+      // Événements
+      form.addEventListener("submit", function (e) { e.preventDefault(); generate(); });
+      form.addEventListener("input", refreshPreview);
+
+      document.getElementById("reset").addEventListener("click", function () {
+        form.reset();
+        document.getElementById("org").value = "Way2tech.au";
+        refreshPreview();
+      });
+
+      document.getElementById("copyLink").addEventListener("click", function () {
+        var input = document.getElementById("link");
+        navigator.clipboard ? navigator.clipboard.writeText(input.value).then(function () { toast("Lien copié ✔"); })
+          : (input.select(), document.execCommand("copy"), toast("Lien copié ✔"));
+      });
+
+      document.getElementById("downloadVcf").addEventListener("click", function () {
+        var d = readForm();
+        download(W2T.vcardFilename(d), W2T.toVCard(d), "text/vcard;charset=utf-8");
+      });
+
+      document.getElementById("downloadQr").addEventListener("click", function () {
+        if (!lastQR) return;
+        var a = document.createElement("a");
+        a.href = lastQR.toPNG();
+        a.download = "qr-way2tech.png";
+        a.target = "_blank";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      });
+
+      document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+
+      // Préremplissage : depuis un lien existant (#data) ou le stockage local.
+      (function init() {
+        var fromHash = location.hash ? W2T.decode(location.hash.slice(1)) : null;
+        if (fromHash) {
+          writeForm(fromHash);
+          generate();
+          return;
+        }
+        try {
+          var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+          if (saved) writeForm(saved);
+        } catch (e) {}
+        refreshPreview();
+      })();
+    })();
+  </script>
+</body>
+</html>
