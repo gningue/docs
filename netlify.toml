@@ -1,0 +1,18 @@
+# Déploiement Netlify de l'application de cartes de visite Way2tech.au
+# Site statique : aucun build, on publie simplement le dossier card-app/.
+
+[build]
+  publish = "card-app"
+  command = ""
+
+# Sécurité / cache de base
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
