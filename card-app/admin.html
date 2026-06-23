@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Console admin — Cartes vérifiées Way2tech.ai</title>
+  <meta name="robots" content="noindex" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/trust.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+</head>
+<body>
+  <div class="w2t-wrap">
+    <header class="w2t-page-head">
+      <span class="brand"><span class="dot"></span> Way2tech.ai · Console admin</span>
+      <h1>Émettre des cartes vérifiées</h1>
+      <p>Signez les cartes officielles avec la clé privée de l'organisation. À usage interne.</p>
+    </header>
+
+    <!-- Étape 1 : clé de l'organisation -->
+    <section class="w2t-panel" style="margin-bottom:22px;">
+      <h2>1. Clé de l'organisation</h2>
+      <p id="keyStatus" class="w2t-hint" style="margin-top:0;">Aucune clé chargée sur cet appareil.</p>
+
+      <div class="w2t-actions">
+        <button type="button" class="w2t-btn primary" id="genKey">Générer la clé de l'organisation</button>
+        <button type="button" class="w2t-btn" id="importKey">Importer une clé existante</button>
+        <button type="button" class="w2t-btn" id="exportKey">Sauvegarder la clé privée</button>
+      </div>
+
+      <div id="pubBox" style="display:none; margin-top:16px;">
+        <div class="w2t-field">
+          <label>Clé publique (à coller dans <code>assets/trust.js</code>, puis re-déployer)</label>
+          <textarea id="pubKeyOut" readonly style="min-height:60px; font-family:monospace; font-size:12px;"></textarea>
+        </div>
+        <div class="w2t-field">
+          <label>Ligne prête à coller</label>
+          <textarea id="trustLine" readonly style="min-height:48px; font-family:monospace; font-size:12px;"></textarea>
+        </div>
+        <button type="button" class="w2t-btn" id="copyPub">Copier la clé publique</button>
+      </div>
+
+      <p class="w2t-warn" style="margin-top:16px;">
+        ⚠️ La <strong>clé privée</strong> reste sur cet appareil (stockage local du navigateur). Ne la partagez
+        jamais : quiconque la possède peut émettre de fausses cartes « vérifiées ». Faites-en une sauvegarde
+        sûre via « Sauvegarder la clé privée ».
+      </p>
+    </section>
+
+    <!-- Étape 2 : signer une carte -->
+    <div class="w2t-grid">
+      <section class="w2t-panel">
+        <h2>2. Informations du membre</h2>
+
+        <div class="w2t-field">
+          <label for="importLink">Importer depuis un lien brouillon (optionnel)</label>
+          <textarea id="importLink" placeholder="Collez ici le lien généré par un membre dans l'éditeur…"></textarea>
+          <button type="button" class="w2t-btn" id="loadLink" style="margin-top:8px;">Charger ce lien</button>
+        </div>
+
+        <form id="form">
+          <div class="w2t-two">
+            <div class="w2t-field"><label for="firstName">Prénom</label><input id="firstName" type="text" /></div>
+            <div class="w2t-field"><label for="lastName">Nom</label><input id="lastName" type="text" /></div>
+          </div>
+          <div class="w2t-field"><label for="title">Poste / Fonction</label><input id="title" type="text" /></div>
+          <div class="w2t-field"><label for="org">Entreprise</label><input id="org" type="text" value="Way2tech.ai" /></div>
+          <div class="w2t-two">
+            <div class="w2t-field"><label for="mobile">Mobile</label><input id="mobile" type="tel" /></div>
+            <div class="w2t-field"><label for="phone">Téléphone</label><input id="phone" type="tel" /></div>
+          </div>
+          <div class="w2t-field"><label for="email">Email</label><input id="email" type="email" /></div>
+          <div class="w2t-field"><label for="website">Site web</label><input id="website" type="text" /></div>
+          <div class="w2t-field"><label for="linkedin">LinkedIn</label><input id="linkedin" type="text" /></div>
+          <div class="w2t-field"><label for="address">Adresse</label><input id="address" type="text" /></div>
+          <div class="w2t-field"><label for="note">Note</label><textarea id="note"></textarea></div>
+
+          <div class="w2t-actions">
+            <button type="submit" class="w2t-btn primary">Signer &amp; générer la carte vérifiée</button>
+          </div>
+        </form>
+      </section>
+
+      <section>
+        <div class="w2t-panel" style="margin-bottom:22px;">
+          <h2>Aperçu</h2>
+          <div id="preview"></div>
+        </div>
+
+        <div class="w2t-panel w2t-share" id="shareBlock" style="display:none;">
+          <h2>Carte vérifiée</h2>
+          <div class="w2t-qr" id="qr"></div>
+          <div class="w2t-link">
+            <input id="link" type="text" readonly />
+            <button type="button" class="w2t-btn" id="copyLink">Copier</button>
+          </div>
+          <div class="w2t-actions" style="justify-content:center;">
+            <a class="w2t-btn primary" id="openCard" target="_blank" rel="noopener">Ouvrir</a>
+            <button type="button" class="w2t-btn" id="downloadQr">Télécharger le QR</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="w2t-foot">Way2tech.ai · Console interne d'émission de cartes vérifiées</footer>
+  </div>
+
+  <div class="w2t-toast" id="toast"></div>
+
+  <script src="assets/card.js"></script>
+  <script>
+    (function () {
+      var FIELDS = ["firstName","lastName","title","org","mobile","phone","email","website","linkedin","address","note"];
+      var KEY_STORE = "w2t_admin_key";
+      var subtle = window.crypto && window.crypto.subtle;
+      var lastQR = null;
+
+      function $(id) { return document.getElementById(id); }
+      function toast(msg) {
+        var t = $("toast"); t.textContent = msg; t.classList.add("show");
+        clearTimeout(toast._t); toast._t = setTimeout(function(){ t.classList.remove("show"); }, 1900);
+      }
+      function readForm() { var d={}; FIELDS.forEach(function(k){ d[k]=$(k).value.trim(); }); return d; }
+      function writeForm(d) { FIELDS.forEach(function(k){ if(d[k]!=null) $(k).value=d[k]; }); }
+
+      if (!subtle) {
+        $("keyStatus").textContent = "Ce navigateur ne supporte pas Web Crypto (HTTPS requis).";
+      }
+
+      /* ---------- Gestion de la clé ---------- */
+      function loadStoredJwk() {
+        try { return JSON.parse(localStorage.getItem(KEY_STORE) || "null"); } catch (e) { return null; }
+      }
+      function setStatus() {
+        var jwk = loadStoredJwk();
+        $("keyStatus").textContent = jwk
+          ? "✓ Une clé d'organisation est chargée sur cet appareil."
+          : "Aucune clé chargée sur cet appareil.";
+      }
+      function pubJwkFromPriv(jwk) {
+        return { kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y, ext: true, key_ops: ["verify"] };
+      }
+      async function showPublicKey(jwk) {
+        var pub = await subtle.importKey("jwk", pubJwkFromPriv(jwk), { name:"ECDSA", namedCurve:"P-256" }, true, ["verify"]);
+        var spki = await subtle.exportKey("spki", pub);
+        var b64 = W2T.bytesToB64url(spki);
+        $("pubKeyOut").value = b64;
+        $("trustLine").value = 'pubKey: "' + b64 + '"';
+        $("pubBox").style.display = "block";
+      }
+      async function getSigningKey() {
+        var jwk = loadStoredJwk();
+        if (!jwk) throw new Error("no key");
+        var j = Object.assign({}, jwk, { key_ops: ["sign"] });
+        return subtle.importKey("jwk", j, { name:"ECDSA", namedCurve:"P-256" }, false, ["sign"]);
+      }
+
+      $("genKey").addEventListener("click", async function () {
+        if (!subtle) return;
+        if (loadStoredJwk() && !confirm("Une clé existe déjà sur cet appareil. La remplacer invalidera toutes les cartes déjà émises. Continuer ?")) return;
+        var kp = await subtle.generateKey({ name:"ECDSA", namedCurve:"P-256" }, true, ["sign","verify"]);
+        var jwk = await subtle.exportKey("jwk", kp.privateKey);
+        localStorage.setItem(KEY_STORE, JSON.stringify(jwk));
+        await showPublicKey(jwk);
+        setStatus();
+        toast("Clé générée ✔");
+      });
+
+      $("importKey").addEventListener("click", function () {
+        var txt = prompt("Collez la clé privée (format JWK JSON) :");
+        if (!txt) return;
+        try {
+          var jwk = JSON.parse(txt);
+          if (jwk.kty !== "EC" || !jwk.d) throw new Error("format");
+          localStorage.setItem(KEY_STORE, JSON.stringify(jwk));
+          showPublicKey(jwk); setStatus(); toast("Clé importée ✔");
+        } catch (e) { alert("Clé invalide (JWK EC attendu)."); }
+      });
+
+      $("exportKey").addEventListener("click", function () {
+        var jwk = loadStoredJwk();
+        if (!jwk) { alert("Aucune clé à sauvegarder."); return; }
+        var blob = new Blob([JSON.stringify(jwk, null, 2)], { type: "application/json" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "way2tech-cle-privee.json";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+      });
+
+      $("copyPub").addEventListener("click", function () {
+        $("pubKeyOut").select();
+        navigator.clipboard ? navigator.clipboard.writeText($("pubKeyOut").value).then(function(){toast("Clé publique copiée ✔");})
+          : (document.execCommand("copy"), toast("Clé publique copiée ✔"));
+      });
+
+      /* ---------- Préremplissage depuis un lien ---------- */
+      $("loadLink").addEventListener("click", function () {
+        var v = $("importLink").value.trim();
+        var hash = v.indexOf("#") >= 0 ? v.slice(v.indexOf("#")) : v;
+        var parsed = W2T.parseLink(hash);
+        var d = W2T.decode(parsed.d);
+        if (!d) { alert("Lien illisible."); return; }
+        writeForm(d); W2T.render($("preview"), d); toast("Brouillon chargé ✔");
+      });
+
+      /* ---------- Signature ---------- */
+      document.getElementById("form").addEventListener("input", function () {
+        W2T.render($("preview"), readForm());
+      });
+
+      document.getElementById("form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        if (!subtle) { alert("Web Crypto indisponible (HTTPS requis)."); return; }
+        if (!loadStoredJwk()) { alert("Générez ou importez d'abord la clé de l'organisation."); return; }
+
+        var d = readForm();
+        var dataB64 = W2T.encode(d);
+        var key = await getSigningKey();
+        var sigBuf = await subtle.sign({ name:"ECDSA", hash:"SHA-256" }, key, new TextEncoder().encode(dataB64));
+        var sigB64 = W2T.bytesToB64url(sigBuf);
+
+        var base = new URL("card.html", window.location.href);
+        var url = base.href + "#" + W2T.buildFragment(dataB64, sigB64);
+
+        W2T.render($("preview"), d, { verified: true });
+        $("link").value = url;
+        $("openCard").href = url;
+        lastQR = W2T.makeQR($("qr"), url, { size: 240 });
+        $("shareBlock").style.display = "block";
+        $("shareBlock").scrollIntoView({ behavior:"smooth", block:"nearest" });
+        toast("Carte signée ✔");
+      });
+
+      $("copyLink").addEventListener("click", function () {
+        var input = $("link");
+        navigator.clipboard ? navigator.clipboard.writeText(input.value).then(function(){toast("Lien copié ✔");})
+          : (input.select(), document.execCommand("copy"), toast("Lien copié ✔"));
+      });
+      $("downloadQr").addEventListener("click", function () {
+        if (!lastQR) return;
+        var a = document.createElement("a");
+        a.href = lastQR.toPNG(); a.download = "qr-way2tech-verifie.png"; a.target = "_blank";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      });
+
+      // Init
+      setStatus();
+      W2T.render($("preview"), { org: "Way2tech.ai" });
+    })();
+  </script>
+</body>
+</html>

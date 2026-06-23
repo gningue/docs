@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carte de visite — Way2tech.ai</title>
+  <meta name="description" content="Carte de visite numérique Way2tech.ai." />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/trust.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+</head>
+<body>
+  <div class="w2t-public">
+    <div id="card"></div>
+
+    <div class="w2t-warn w2t-no-print" id="warn" style="display:none;">
+      ⚠️ Carte <strong>non vérifiée</strong> : elle n'a pas été émise officiellement par Way2tech.ai. Vérifiez l'identité avant de l'enregistrer.
+    </div>
+
+    <div class="w2t-cta w2t-no-print" id="cta" style="display:none;">
+      <button type="button" class="w2t-btn primary block" id="save">➕ Ajouter à mes contacts</button>
+      <div class="w2t-actions" style="justify-content:center;">
+        <button type="button" class="w2t-btn" id="share">Partager</button>
+      </div>
+    </div>
+
+    <div class="w2t-qr-block w2t-no-print" id="qrBlock" style="display:none;">
+      <h3>Scannez pour enregistrer ce contact</h3>
+      <p>Pointez l'appareil photo d'un téléphone vers ce code.</p>
+      <div class="w2t-qr" id="qr"></div>
+    </div>
+
+    <div id="empty" style="display:none; text-align:center; padding:40px 10px;">
+      <h2>Carte introuvable</h2>
+      <p style="color:var(--w2t-muted)">Ce lien ne contient pas de carte valide.</p>
+      <a class="w2t-btn primary" href="index.html">Créer ma carte</a>
+    </div>
+
+    <footer class="w2t-foot w2t-no-print">
+      Propulsé par <a href="index.html">Way2tech.ai</a> · Carte de visite numérique
+    </footer>
+  </div>
+
+  <div class="w2t-toast" id="toast"></div>
+
+  <script src="assets/card.js"></script>
+  <script>
+    (function () {
+      var parsed = W2T.parseLink(location.hash);
+      var data = parsed.d ? W2T.decode(parsed.d) : null;
+      var cardEl = document.getElementById("card");
+
+      function toast(msg) {
+        var t = document.getElementById("toast");
+        t.textContent = msg; t.classList.add("show");
+        clearTimeout(toast._t);
+        toast._t = setTimeout(function () { t.classList.remove("show"); }, 1900);
+      }
+
+      if (!data) {
+        document.getElementById("empty").style.display = "block";
+        return;
+      }
+
+      // Titre de l'onglet = nom de la personne.
+      var fullName = ((data.firstName || "") + " " + (data.lastName || "")).trim();
+      if (fullName) document.title = fullName + " — Way2tech.ai";
+
+      W2T.render(cardEl, data);
+      document.getElementById("cta").style.display = "grid";
+      document.getElementById("qrBlock").style.display = "block";
+
+      // Vérification de la signature -> badge « vérifié » ou avertissement.
+      // (Uniquement si une clé publique est configurée dans assets/trust.js.)
+      if (W2T.trustConfigured()) {
+        W2T.verify(parsed.d, parsed.s).then(function (ok) {
+          if (ok) {
+            W2T.render(cardEl, data, { verified: true });
+          } else {
+            document.getElementById("warn").style.display = "block";
+          }
+        });
+      }
+
+      // QR pointant vers cette même carte (pour la repartager / l'imprimer).
+      W2T.makeQR(document.getElementById("qr"), window.location.href, { size: 220 });
+
+      // Ajout au carnet d'adresses : téléchargement du fichier vCard (.vcf).
+      function saveContact() {
+        var vcf = W2T.toVCard(data);
+        var blob = new Blob([vcf], { type: "text/vcard;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = W2T.vcardFilename(data);
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+        toast("Contact prêt à être enregistré ✔");
+      }
+      document.getElementById("save").addEventListener("click", saveContact);
+
+      // Partage natif (mobile) ou copie du lien (bureau).
+      document.getElementById("share").addEventListener("click", function () {
+        if (navigator.share) {
+          navigator.share({ title: fullName || "Carte de visite", url: window.location.href }).catch(function () {});
+        } else if (navigator.clipboard) {
+          navigator.clipboard.writeText(window.location.href).then(function () { toast("Lien copié ✔"); });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
