@@ -16,5 +16,5 @@
  */
 window.W2T_TRUST = {
   org: "Way2tech.au",
-  pubKey: "" // <-- collez ici la clé publique générée dans admin.html
+  pubKey: "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEv6lAYY9L9IxytoO-uMojXsvnxu6VeZ7Af6oflKKslEu2UdNZ-rCu2u0UUguNhYIDtCTxs5ONiJkbgCjAoiq_HQ"
 };
