@@ -16,7 +16,6 @@
       <button type="button" class="w2t-btn primary block" id="save">➕ Ajouter à mes contacts</button>
       <div class="w2t-actions" style="justify-content:center;">
         <button type="button" class="w2t-btn" id="share">Partager</button>
-        <a class="w2t-btn" id="edit">Modifier cette carte</a>
       </div>
     </div>
 
@@ -64,7 +63,6 @@
       W2T.render(cardEl, data);
       document.getElementById("cta").style.display = "grid";
       document.getElementById("qrBlock").style.display = "block";
-      document.getElementById("edit").href = "index.html" + location.hash;
 
       // QR pointant vers cette même carte (pour la repartager / l'imprimer).
       W2T.makeQR(document.getElementById("qr"), window.location.href, { size: 220 });
