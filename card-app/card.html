@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Carte de visite — Way2tech.au</title>
-  <meta name="description" content="Carte de visite numérique Way2tech.au." />
+  <title>Carte de visite — Way2tech.ai</title>
+  <meta name="description" content="Carte de visite numérique Way2tech.ai." />
   <link rel="stylesheet" href="assets/styles.css" />
   <script src="assets/trust.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
@@ -14,7 +14,7 @@
     <div id="card"></div>
 
     <div class="w2t-warn w2t-no-print" id="warn" style="display:none;">
-      ⚠️ Carte <strong>non vérifiée</strong> : elle n'a pas été émise officiellement par Way2tech.au. Vérifiez l'identité avant de l'enregistrer.
+      ⚠️ Carte <strong>non vérifiée</strong> : elle n'a pas été émise officiellement par Way2tech.ai. Vérifiez l'identité avant de l'enregistrer.
     </div>
 
     <div class="w2t-cta w2t-no-print" id="cta" style="display:none;">
@@ -37,7 +37,7 @@
     </div>
 
     <footer class="w2t-foot w2t-no-print">
-      Propulsé par <a href="index.html">Way2tech.au</a> · Carte de visite numérique
+      Propulsé par <a href="index.html">Way2tech.ai</a> · Carte de visite numérique
     </footer>
   </div>
 
@@ -64,7 +64,7 @@
 
       // Titre de l'onglet = nom de la personne.
       var fullName = ((data.firstName || "") + " " + (data.lastName || "")).trim();
-      if (fullName) document.title = fullName + " — Way2tech.au";
+      if (fullName) document.title = fullName + " — Way2tech.ai";
 
       W2T.render(cardEl, data);
       document.getElementById("cta").style.display = "grid";

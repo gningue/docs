@@ -1,5 +1,5 @@
 /*
- * Way2tech.au — Cartes de visite numériques
+ * Way2tech.ai — Cartes de visite numériques
  * Module partagé (éditeur + page publique).
  * Aucune dépendance serveur : tout est calculé dans le navigateur.
  */
@@ -71,7 +71,7 @@
   }
 
   function getTrust() {
-    return global.W2T_TRUST || { pubKey: "", org: "Way2tech.au" };
+    return global.W2T_TRUST || { pubKey: "", org: "Way2tech.ai" };
   }
 
   function trustConfigured() {
@@ -200,7 +200,7 @@
     var fullName = ((d.firstName || "") + " " + (d.lastName || "")).trim() || "Votre nom";
     var color = avatarColor(d);
     var badge = opts.verified
-      ? '<div class="w2t-badge">✓ Membre vérifié ' + escapeHtml(getTrust().org || "Way2tech.au") + "</div>"
+      ? '<div class="w2t-badge">✓ Membre vérifié ' + escapeHtml(getTrust().org || "Way2tech.ai") + "</div>"
       : "";
 
     function row(icon, label, value, href) {

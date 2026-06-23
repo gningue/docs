@@ -1,5 +1,5 @@
 /*
- * Configuration de confiance Way2tech.au — clé publique de vérification.
+ * Configuration de confiance Way2tech.ai — clé publique de vérification.
  *
  * Le badge « ✓ Membre vérifié » n'apparaît que pour les cartes signées avec la
  * clé PRIVÉE correspondante (détenue uniquement par l'administrateur dans
@@ -15,6 +15,6 @@
  * (les cartes restent affichables, sans badge).
  */
 window.W2T_TRUST = {
-  org: "Way2tech.au",
+  org: "Way2tech.ai",
   pubKey: "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEv6lAYY9L9IxytoO-uMojXsvnxu6VeZ7Af6oflKKslEu2UdNZ-rCu2u0UUguNhYIDtCTxs5ONiJkbgCjAoiq_HQ"
 };

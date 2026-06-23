@@ -1,7 +1,7 @@
-# Cartes de visite numériques — Way2tech.au
+# Cartes de visite numériques — Way2tech.ai
 
 Application web **100 % gratuite et sans serveur** permettant à chaque membre de
-Way2tech.au de créer, partager et imprimer sa carte de visite numérique avec
+Way2tech.ai de créer, partager et imprimer sa carte de visite numérique avec
 QR code. Un prospect scanne le QR, voit la carte, puis l'ajoute en un clic à son
 carnet d'adresses (fichier vCard `.vcf` compatible iPhone, Android, Outlook,
 Google Contacts).
@@ -33,7 +33,7 @@ Les informations de la carte sont **encodées directement dans le lien** (après
 ## Cartes vérifiées (badge anti-usurpation)
 
 Comme l'app est sans serveur, n'importe qui peut techniquement fabriquer un lien
-à votre nom. Pour distinguer les **vraies** cartes Way2tech.au, on utilise une
+à votre nom. Pour distinguer les **vraies** cartes Way2tech.ai, on utilise une
 **signature cryptographique** (ECDSA P-256) :
 
 - **`admin.html`** — console interne. Détient la **clé privée** (stockée
@@ -41,7 +41,7 @@ Comme l'app est sans serveur, n'importe qui peut techniquement fabriquer un lien
   Elle produit un lien vérifié + QR.
 - **`assets/trust.js`** — contient la **clé publique** (sert seulement à
   vérifier, publiable sans risque).
-- **`card.html`** — affiche le badge **« ✓ Membre vérifié Way2tech.au »**
+- **`card.html`** — affiche le badge **« ✓ Membre vérifié Way2tech.ai »**
   uniquement si la signature est valide ; sinon un avertissement « carte non
   vérifiée ». Sans la clé privée, **impossible de forger un badge valide**.
 

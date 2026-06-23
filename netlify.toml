@@ -1,4 +1,4 @@
-# Déploiement Netlify de l'application de cartes de visite Way2tech.au
+# Déploiement Netlify de l'application de cartes de visite Way2tech.ai
 # Site statique : aucun build, on publie simplement le dossier card-app/.
 
 [build]
