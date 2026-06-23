@@ -32,6 +32,80 @@
   }
 
   /* ----------------------------------------------------------------------
+   * Cartes signées — badge « Membre vérifié ».
+   * Le fragment d'URL peut contenir : <données> ou <données>.<signature>.
+   * La signature (ECDSA P-256) est produite par la console admin avec la clé
+   * privée Way2tech ; ici on ne fait que la VÉRIFIER avec la clé publique
+   * intégrée dans assets/trust.js. Sans clé privée, impossible de forger un
+   * badge valide.
+   * -------------------------------------------------------------------- */
+
+  var SIG_SEP = ".";
+
+  function parseLink(hash) {
+    if (!hash) return { d: "", s: "" };
+    var raw = hash.charAt(0) === "#" ? hash.slice(1) : hash;
+    var i = raw.indexOf(SIG_SEP);
+    if (i === -1) return { d: raw, s: "" };
+    return { d: raw.slice(0, i), s: raw.slice(i + 1) };
+  }
+
+  function buildFragment(dataB64, sigB64) {
+    return sigB64 ? dataB64 + SIG_SEP + sigB64 : dataB64;
+  }
+
+  function b64urlToBytes(s) {
+    s = String(s || "").replace(/-/g, "+").replace(/_/g, "/");
+    while (s.length % 4) s += "=";
+    var bin = atob(s);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
+  function bytesToB64url(bytes) {
+    var bin = "";
+    var arr = new Uint8Array(bytes);
+    for (var i = 0; i < arr.length; i++) bin += String.fromCharCode(arr[i]);
+    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  function getTrust() {
+    return global.W2T_TRUST || { pubKey: "", org: "Way2tech.au" };
+  }
+
+  function trustConfigured() {
+    return !!(getTrust().pubKey);
+  }
+
+  var _pubKeyPromise = null;
+  function importPubKey() {
+    var trust = getTrust();
+    if (!trust.pubKey || !global.crypto || !global.crypto.subtle) {
+      return Promise.resolve(null);
+    }
+    if (!_pubKeyPromise) {
+      _pubKeyPromise = global.crypto.subtle
+        .importKey("spki", b64urlToBytes(trust.pubKey),
+          { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"])
+        .catch(function () { return null; });
+    }
+    return _pubKeyPromise;
+  }
+
+  // Renvoie une promesse booléenne : la carte est-elle authentiquement signée ?
+  function verify(dataB64, sigB64) {
+    if (!sigB64 || !global.crypto || !global.crypto.subtle) return Promise.resolve(false);
+    return importPubKey().then(function (key) {
+      if (!key) return false;
+      return global.crypto.subtle.verify(
+        { name: "ECDSA", hash: "SHA-256" }, key,
+        b64urlToBytes(sigB64), new TextEncoder().encode(dataB64)
+      ).catch(function () { return false; });
+    });
+  }
+
+  /* ----------------------------------------------------------------------
    * Génération du fichier vCard (.vcf) — standard des carnets d'adresses.
    * Format vCard 3.0 : compatible iOS, Android, Outlook, Google Contacts.
    * -------------------------------------------------------------------- */
@@ -120,10 +194,14 @@
    * Rendu visuel de la carte (utilisé en aperçu et sur la page publique).
    * -------------------------------------------------------------------- */
 
-  function render(el, d) {
+  function render(el, d, opts) {
     d = d || {};
+    opts = opts || {};
     var fullName = ((d.firstName || "") + " " + (d.lastName || "")).trim() || "Votre nom";
     var color = avatarColor(d);
+    var badge = opts.verified
+      ? '<div class="w2t-badge">✓ Membre vérifié ' + escapeHtml(getTrust().org || "Way2tech.au") + "</div>"
+      : "";
 
     function row(icon, label, value, href) {
       if (!value) return "";
@@ -147,6 +225,7 @@
       '<h1 class="w2t-name">' + escapeHtml(fullName) + "</h1>" +
       (d.title ? '<p class="w2t-title">' + escapeHtml(d.title) + "</p>" : "") +
       (d.org ? '<p class="w2t-org">' + escapeHtml(d.org) + "</p>" : "") +
+      badge +
       "</div>" +
       '<ul class="w2t-list">' +
       row("📱", "Mobile", d.mobile, d.mobile ? "tel:" + d.mobile : "") +
@@ -232,6 +311,14 @@
     vcardFilename: vcardFilename,
     normalizeUrl: normalizeUrl,
     render: render,
-    makeQR: makeQR
+    makeQR: makeQR,
+    // Cartes signées / badge vérifié
+    parseLink: parseLink,
+    buildFragment: buildFragment,
+    verify: verify,
+    trustConfigured: trustConfigured,
+    getTrust: getTrust,
+    b64urlToBytes: b64urlToBytes,
+    bytesToB64url: bytesToB64url
   };
 })(window);

@@ -30,6 +30,39 @@ Les informations de la carte sont **encodées directement dans le lien** (après
 > Le QR code est généré dans le navigateur. Si la petite librairie QR n'est pas
 > disponible, l'application bascule automatiquement sur un service image gratuit.
 
+## Cartes vérifiées (badge anti-usurpation)
+
+Comme l'app est sans serveur, n'importe qui peut techniquement fabriquer un lien
+à votre nom. Pour distinguer les **vraies** cartes Way2tech.au, on utilise une
+**signature cryptographique** (ECDSA P-256) :
+
+- **`admin.html`** — console interne. Détient la **clé privée** (stockée
+  localement dans le navigateur de l'admin) et **signe** les cartes officielles.
+  Elle produit un lien vérifié + QR.
+- **`assets/trust.js`** — contient la **clé publique** (sert seulement à
+  vérifier, publiable sans risque).
+- **`card.html`** — affiche le badge **« ✓ Membre vérifié Way2tech.au »**
+  uniquement si la signature est valide ; sinon un avertissement « carte non
+  vérifiée ». Sans la clé privée, **impossible de forger un badge valide**.
+
+### Mise en place (une seule fois)
+
+1. Ouvrez `admin.html` → **Générer la clé de l'organisation**.
+2. **Sauvegardez la clé privée** (bouton dédié) en lieu sûr, et ne la partagez
+   jamais.
+3. Copiez la **clé publique** affichée et collez-la dans `assets/trust.js`
+   (`pubKey: "..."`), puis re-déployez.
+
+### Émettre une carte vérifiée
+
+1. Le membre remplit sa carte dans `index.html` et vous envoie son **lien
+   brouillon** (ou vous saisissez ses infos directement).
+2. Dans `admin.html`, importez le brouillon (ou remplissez le formulaire) →
+   **Signer & générer** → vous obtenez le lien + QR vérifiés à lui transmettre.
+
+> Tant que `pubKey` est vide dans `trust.js`, le badge est simplement inactif :
+> les cartes restent affichables normalement, sans badge.
+
 ## Mise en ligne gratuite (GitHub Pages)
 
 1. Dans le dépôt GitHub : **Settings → Pages**.

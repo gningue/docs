@@ -157,6 +157,30 @@ a { color: var(--w2t-green-dark); }
 .w2t-title { margin: 0; color: var(--w2t-muted); font-weight: 600; }
 .w2t-org { margin: 2px 0 0; color: var(--w2t-green-dark); font-weight: 700; font-size: 14px; }
 
+.w2t-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px auto 0;
+  padding: 5px 13px;
+  border-radius: 999px;
+  background: #eafaf0;
+  color: var(--w2t-green-dark);
+  border: 1px solid #bfe8cd;
+  font-size: 13px;
+  font-weight: 700;
+}
+.w2t-warn {
+  max-width: 440px;
+  margin: 14px auto 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-size: 13.5px;
+}
+
 .w2t-list { list-style: none; margin: 14px 0 6px; padding: 0 18px 12px; }
 .w2t-row {
   display: flex;
